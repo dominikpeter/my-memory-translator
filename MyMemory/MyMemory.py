@@ -13,6 +13,8 @@ class MyMemory:
         self.scores = []
         self.limit_reached = False
         self.seconds_to_wait = 0
+        self.minutes_to_wait = 0
+        self.hours_to_wait = 0
 
     def translate(self, sentence, source_lang, target_lang):
         self.params = {"q": sentence,
@@ -30,15 +32,18 @@ class MyMemory:
             time_string = re.findall(
                 r"\d*\sHOURS\s\d*\sMINUTES\s\d*\sSECONDS", warning)[0]
             ti = time.strptime(
-                "09 HOURS 49 MINUTES 28 SECONDS",
+                time_string,
                 "%H HOURS %M MINUTES %S SECONDS")
             self.seconds_to_wait = timedelta(hours=ti.tm_hour,
                                              minutes=ti.tm_min,
                                              seconds=ti.tm_sec).total_seconds()
+            self.minutes_to_wait = self.seconds_to_wait / 60
+            self.hours_to_wait = self.minutes_to_wait / 60
         else:
             self.translations = [i['translation'] for i in self.json['matches']]
             self.translations = [html.unescape(i) for i in self.translations]
-            self.scores = [self._parse_int(i['quality']) for i in self.json['matches']]
+            self.scores = [self._parse_int(
+                i['quality']) for i in self.json['matches']]
 
     def extract_first(self, score=True):
         translation = self.translations[0]
